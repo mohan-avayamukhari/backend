@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors())
 
 app.use("/auth", authRoutes);
-app.use("/clusters", clusterRoutes);
+app.use("/cluster", clusterRoutes);
 
 const PORT = process.env.PORT || 9000;
 mongoose.connect(process.env.MONGO_URL, {
