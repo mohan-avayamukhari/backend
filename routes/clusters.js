@@ -1,9 +1,11 @@
 import express from "express";
-import { addCluster, getAllClusters } from "../controllers/clusters.js";
+import { addCluster, updateCluster, getAllClusters, deleteCluster } from "../controllers/clusters.js";
 import authToken from "../middleware/authToken.js";
 const router = express.Router()
 
-router.post('/add-cluster', addCluster);
-router.get('/get-all', getAllClusters)
+router.post('/add-cluster',authToken, addCluster);
+router.get('/get-all', authToken, getAllClusters)
+router.delete('/:id', authToken, deleteCluster)
+router.put('/:id', authToken, updateCluster)
 
 export default router;

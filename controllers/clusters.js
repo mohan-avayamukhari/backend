@@ -18,6 +18,23 @@ const addCluster = async(req, res) => {
   }
 }
 
+const updateCluster = async (req, res) => {
+  try {
+    const clusterId = req.params.id;
+    const cluster = await Cluster.findById(clusterId);
+    if (!cluster) {
+      return res.status(404).json({ error: 'Cluster not found' });
+    }
+    Object.assign(cluster, req.body);
+    await cluster.save();
+    res.status(200).json(cluster.toJSON());
+  } catch (error) {
+    console.error('Error updating cluster:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 const getAllClusters = async (req, res) => {
   try {
     const clusters = await Cluster.find();
@@ -28,4 +45,19 @@ const getAllClusters = async (req, res) => {
   }
 };
 
-export {addCluster, getAllClusters}
+const deleteCluster = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await Cluster.deleteOne({ _id: id});
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Cluster not found' });
+    }
+    res.status(200).end();
+  } catch (error) {
+    console.error('Error deleting cluster:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+export {addCluster, updateCluster, getAllClusters, deleteCluster}

@@ -27,21 +27,40 @@ const createUser = async (req, res) => {
   }
 };
 
+const updatePsw = async(req, res) => {
+  try {
+    const user = await Users.findOne({ name: req.user.name });
+    if (!user) {
+      //should log out the user
+      return res.status(404).json({ error: "Authentication failed. User does not exist" });
+    }
+    const isPasswordValid = bcrypt.compareSync(req.body.currentPsw, user.psw);
+    
+    if (isPasswordValid && (req.body.newPsw === req.body.confirmPsw)) {
+      const hashedPsw = await bcrypt.hash(req.body.newPsw, await bcrypt.genSalt());
+      user.psw = hashedPsw;
+      await user.save();
+      return res.status(200).end()
+    } else {
+      return res.status(401).json({ error: "Authentication failed. Invalid password or New password and Confirm password did not match" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+}
+
 
 const login = async(req, res) => {
   try {
     const user = await Users.findOne({ name: req.body.name });
-    console.log(user);
     if (!user) {
       return res.status(404).json({ error: "Authentication failed. User does not exist" });
     }
-
     const isPasswordValid = bcrypt.compareSync(req.body.psw, user.psw);
-    console.log(isPasswordValid);
-
     if (isPasswordValid) {
-      const accessToken = jwt.sign({ name: req.body.name }, process.env.TOKEN_SECRET, { expiresIn: '5m' });
-      res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+      const accessToken = jwt.sign({ name: req.body.name }, process.env.TOKEN_SECRET, { expiresIn: '6m' });
+      res.cookie("accessToken", accessToken, { httpOnly: true});
       return res.status(200).end()
     } else {
       return res.status(401).json({ error: "Authentication failed. Invalid password" });
@@ -52,13 +71,23 @@ const login = async(req, res) => {
   }
 }
 
+const logout = async(req, res) => {
+  try {
+      res.cookie("accessToken", "", { httpOnly: true});
+      return res.status(200).end()
+    }catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+}
+
 
 const refreshToken = (req, res) => {
   try {
     const name = req.user.name;
 
-    const accessToken = jwt.sign({ name: name }, process.env.TOKEN_SECRET, { expiresIn: '5m' });
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+    const accessToken = jwt.sign({ name: name }, process.env.TOKEN_SECRET, { expiresIn: '6m' });
+    res.cookie('accessToken', accessToken, { httpOnly: true});
     res.status(200).end();
   } catch (error) {
     console.error('Error refreshing token:', error.message);
@@ -67,11 +96,16 @@ const refreshToken = (req, res) => {
 };
 
 const checkAuthStatus = (req, res) => {
-  const user = req.user.name;
+  try{
+    const user = req.user.name;
   if(user){
     res.status(200).json({ authenticated: true, user });
+  }
+  }catch(error){
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 };
 
 
-export {createUser, login, refreshToken, checkAuthStatus}
+export {createUser, logout, updatePsw, login, refreshToken, checkAuthStatus}
