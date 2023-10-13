@@ -73,8 +73,8 @@ const login = async(req, res) => {
 
 const logout = async(req, res) => {
   try {
-      res.cookie("accessToken", "", { httpOnly: true});
-      return res.status(200).end()
+    res.cookie("accessToken", "", { httpOnly: true});
+    return res.status(200).end()
     }catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error", details: error.message });
@@ -85,7 +85,6 @@ const logout = async(req, res) => {
 const refreshToken = (req, res) => {
   try {
     const name = req.user.name;
-
     const accessToken = jwt.sign({ name: name }, process.env.TOKEN_SECRET, { expiresIn: '6m' });
     res.cookie('accessToken', accessToken, { httpOnly: true});
     res.status(200).end();

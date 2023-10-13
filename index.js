@@ -7,6 +7,7 @@ import helmet from "helmet"
 import morgan from "morgan"
 import authRoutes from "./routes/auth.js"
 import clusterRoutes from "./routes/clusters.js"
+import k8s from "./routes/k8s.js"
 import cookieParser from "cookie-parser"
 
 
@@ -26,6 +27,7 @@ app.use(cookieParser())
 
 app.use("/auth", authRoutes);
 app.use("/cluster", clusterRoutes);
+app.use("/k8s", k8s)
 
 const PORT = process.env.PORT || 9000;
 mongoose.connect(process.env.MONGO_URL, {
