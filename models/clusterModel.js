@@ -4,7 +4,9 @@ const userSchema = new mongoose.Schema({
   clusterName: String,
   fqdnIp: String,
   port: Number,
-  token: String,
+  severity: String,
+  hashToken: String,
+  tokenIv: String
 });
 
 userSchema.set('toJSON', {
