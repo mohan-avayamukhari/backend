@@ -10,7 +10,6 @@ dotenv.config();
 const createUser = async (req, res) => {
   try {
 
-    // Validate user and psw
 
     const hashedPsw = await bcrypt.hash(req.body.psw, await bcrypt.genSalt())
     const newUser = new Users({

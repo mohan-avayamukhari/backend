@@ -3,7 +3,7 @@ import { encryptToken } from "../components/encrypt.js";
 
 const addCluster = async(req, res) => {
   try{
-    const secureToken = encryptToken(req.body.token)
+    const secureToken = encryptToken(req.body.serviceToken)
     const newCluster = new Cluster({
       clusterName: req.body.clusterName,
       fqdnIp: req.body.fqdnIp,
@@ -29,11 +29,6 @@ const updateCluster = async (req, res) => {
     if (!cluster) {
       return res.status(404).json({ error: 'Cluster not found' });
     }
-    if(req.body.token){
-      const secureToken = encryptToken(req.body.token)
-      cluster.hashToken = secureToken.encryptedToken
-      cluster.tokenIv = secureToken.iv
-    }
     
     cluster.clusterName = req.body.clusterName;
     cluster.fqdnIp = req.body.fqdnIp;
@@ -47,6 +42,25 @@ const updateCluster = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+const changeToken = async (req, res) => {
+  try{
+  const clusterId = req.params.id;
+  const secureToken = encryptToken(req.body.serviceToken)
+
+  const cluster = await Cluster.findById(clusterId)
+  if (!cluster) {
+    return res.status(404).json({ error: "Cluster not found" });
+  }
+  cluster.hashToken = secureToken.encryptedToken;
+  cluster.tokenIv = secureToken.iv
+    await cluster.save();
+    res.status(200).end()
+  }catch(error){
+    console.error("Error updating service token:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
 const updateClusterSeverity = async (req, res) => {
   try {
@@ -73,7 +87,7 @@ const updateClusterSeverity = async (req, res) => {
 
 const getAllClusters = async (req, res) => {
   try {
-    const clusters = await Cluster.find();
+    const clusters = await Cluster.find({}, 'id clusterName fqdnIp port severity');
     res.status(200).json(clusters.map(cluster => cluster.toJSON()));
   } catch (error) {
     console.error("Error getting clusters:", error.message);
@@ -96,4 +110,4 @@ const deleteCluster = async (req, res) => {
 };
 
 
-export {addCluster, updateCluster, updateClusterSeverity, getAllClusters, deleteCluster}
+export {addCluster, updateCluster,changeToken, updateClusterSeverity, getAllClusters, deleteCluster}
