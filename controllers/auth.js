@@ -5,12 +5,8 @@ import jwt  from "jsonwebtoken";
 
 dotenv.config();
 
-
-
 const createUser = async (req, res) => {
   try {
-
-
     const hashedPsw = await bcrypt.hash(req.body.psw, await bcrypt.genSalt())
     const newUser = new Users({
       name: req.body.name,

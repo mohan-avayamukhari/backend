@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 
 const authToken = (req, res, nxt) => {
-  //const token = req.get('Authorization').split(' ')[1];
   const token = req.cookies.accessToken;
   if (token == null) {
     return res.status(401).end("Unauthorized: Token missing");
